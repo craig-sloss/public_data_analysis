@@ -19,6 +19,42 @@ library(dplyr)
 The data were obtained from https://natural-resources.canada.ca/maps-tools-and-publications/publications/minerals-mining-publications/canadian-mining-assets/canadian-mining-assets-cma-country-and-region-2020-and-2021/15406. The table was copy-pasted into a CSV file, and the column headers were manually renamed to facilitate importing the data.
 
 ```{r}
-mining_data_raw = read.csv("./canadian_mining_data/mining_data.csv")
+mining_data_raw = read.csv("./mining_data.csv")
+```
+
+```{r}
+mining_data_raw %>% nrow()
+```
+
+```{r}
+continents = c("AFRICA",
+               "AMERICAS (EXCLUDING CANADA)",
+               "ASIA",
+               "EUROPE",
+               "OCEANIA")
+```
+
+```{r}
+mining_data_clean = mining_data_raw %>%
+  mutate(location_type = case_when(
+    location %in% continents ~ "Continent",
+    TRUE ~ "Other"
+  ),
+  value_2020 = as.numeric(gsub(",", "", value_2020)),
+  value_2021 = as.numeric(gsub(",", "", value_2021))) %>%
+  select(-number_of_companies_2020, -number_of_companies_2021)
+```
+
+```{r}
+mining_data_export = mining_data_clean %>%
+  filter(location_type != "Other")
+```
+
+```{r}
+summary(mining_data_export)
+```
+
+```{r}
+saveRDS(mining_data_export, "./mining_data_processed.rds")
 ```
 
