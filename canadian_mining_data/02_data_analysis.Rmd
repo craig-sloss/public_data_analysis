@@ -1,0 +1,163 @@
+---
+title: "Data Analysis"
+author: "Damian A. Mikhail"
+date: "2023-12-11"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Total
+
+Create a year-over-year change in Canadian expenditure attribute
+
+```{r}
+library(dplyr)
+mining_data_processed = readRDS("./mining_data_processed.rds")
+```
+
+
+```{r}
+mining_data_processed = mining_data_processed %>% 
+  mutate(year_over_year = round(value_2021/value_2020 * 100, 2))
+
+```
+
+Create a percentage of total Canadian expenditure attribute
+
+```{r}
+total_value_2020 <- mining_data_processed %>%
+  filter(location == "TOTAL FOR CANADIAN MINING ASSETS ABROAD") %>%
+  pull(value_2020)
+total_value_2021 <- mining_data_processed %>%
+  filter(location == "TOTAL FOR CANADIAN MINING ASSETS ABROAD") %>%
+  pull(value_2021)
+
+## Total Share per year
+### 2020
+mining_data_processed = mining_data_processed %>% 
+  mutate(share_2020 = round(value_2020/total_value_2020 * 100, 2))
+### 2021
+mining_data_processed = mining_data_processed %>% 
+  mutate(share_2021 = round(value_2021/total_value_2021 * 100, 2))
+
+## Change in Share
+mining_data_processed = mining_data_processed %>% 
+  mutate(share_change = share_2021-share_2020)
+
+```
+
+
+## Year over Year % Change
+
+```{r}
+mining_data_processed %>%
+  filter(location == "TOTAL FOR CANADIAN MINING ASSETS ABROAD") %>%
+  select(location, year_over_year) %>%
+  arrange(desc(year_over_year))
+```
+
+## Total Expenditure
+
+```{r}
+mining_data_processed %>% 
+  filter(location == "TOTAL FOR CANADIAN MINING ASSETS ABROAD") %>%
+  select(location, value_2021) %>%
+  arrange(desc(value_2021))
+```
+
+
+# Continent Based
+
+
+## Year over Year % Change
+
+```{r}
+mining_data_processed %>%
+  filter(location_type == "Continent") %>%
+  select(location, year_over_year) %>%
+  arrange(desc(year_over_year))
+```
+
+## Total Expenditure
+
+```{r}
+mining_data_processed %>% 
+  filter(location_type == "Continent") %>%
+  select(location, value_2021) %>%
+  arrange(desc(value_2021))
+```
+
+## Percentage of Spending
+
+```{r}
+mining_data_processed %>%
+  filter(location_type == "Continent") %>%
+  select(location, share_2020, share_2021) %>%
+  arrange(desc(share_2020))
+```
+
+# Regional
+
+## Year over Year % Change
+
+```{r}
+regional_change = mining_data_processed %>%
+  filter(location_type == "Region") %>%
+  select(location, year_over_year, value_2020) %>%
+  arrange(desc(year_over_year))
+
+regional_change
+```
+
+## Total Expenditure
+
+```{r}
+mining_data_processed %>% 
+  filter(location_type == "Region") %>%
+  select(location, value_2021) %>%
+  arrange(desc(value_2021))
+```
+
+## Share of Spending
+
+```{r}
+mining_data_processed %>%
+  filter(location_type == "Region") %>%
+  select(location, share_2020, share_2021, share_change) %>%
+  arrange(desc(share_change))
+```
+
+# Countries
+
+## Share of Spending
+
+```{r}
+country_share_change = mining_data_processed %>%
+  filter(location_type == "Country") %>%
+  select(location, share_2020, share_2021, share_change) %>%
+  arrange(desc(share_change))
+
+country_share_change
+```
+
+## Countries with Above Average Increases
+
+```{r}
+country_perc_change = mining_data_processed %>%
+  filter(location_type == "Country") %>%
+  filter(year_over_year >= total_value_2021/total_value_2020 * 100) %>%
+  select(location, year_over_year, value_2020) %>%
+  arrange(desc(year_over_year))
+
+country_perc_change
+```
+
+# Export CSV
+
+```{r}
+write.csv(country_perc_change, "./deliverables/country_perc_change.csv")
+write.csv(country_share_change, "./deliverables/country_share_change.csv")
+write.csv(regional_change, "./deliverables/country_regional_change.csv")
+```
+
