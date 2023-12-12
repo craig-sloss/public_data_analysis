@@ -32,16 +32,47 @@ continents = c("AFRICA",
                "ASIA",
                "EUROPE",
                "OCEANIA")
+regions = c("Eastern Africa",
+            "Middle Africa",
+            "Northern Africa",
+            "Southern Africa",
+            "Western Africa",
+            "Caribbean",
+            "Central America",
+            "North America (excluding Canada)",
+            "South America",
+            "Central Asia",
+            "Eastern Asia",
+            "Southeastern Asia",
+            "Southern Asia",
+            "Western Asia",
+            "Eastern Europe",
+            "Northern Europe",
+            "Southern Europe",
+            "Western Europe",
+            "Australia",
+            "Melanesia",
+            "New Zealand")
+total = c("TOTAL FOR CANADIAN MINING ASSETS ABROAD",
+          "TOTAL FOR CANADIAN MINING ASSETS")
 ```
 
 ```{r}
 mining_data_clean = mining_data_raw %>%
   mutate(location_type = case_when(
     location %in% continents ~ "Continent",
-    TRUE ~ "Other"
+    location %in% regions ~ "Region",
+    location %in% total ~ "Total",
+    TRUE ~ "Country"
   ),
-  value_2020 = as.numeric(gsub(",", "", value_2020)),
-  value_2021 = as.numeric(gsub(",", "", value_2021))) %>%
+  value_2020 = case_when(
+    value_2020 == "–" ~ 0,
+    value_2020 == "X" ~ NA,
+    TRUE ~ as.numeric(gsub(",", "", value_2020))),
+  value_2021 = case_when(
+    value_2021 == "–" ~ 0,
+    value_2021 == "X" ~ NA,
+    TRUE ~ as.numeric(gsub(",", "", value_2021)))) %>%
   select(-number_of_companies_2020, -number_of_companies_2021)
 ```
 
