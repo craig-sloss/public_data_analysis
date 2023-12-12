@@ -76,8 +76,19 @@ mining_data_clean = mining_data_raw %>%
   select(-number_of_companies_2020, -number_of_companies_2021)
 ```
 
+Add an indicator column for entries corresponding to Africa. This approach is based on the fact that African entries are the first 35 entries in the data, and is not a rigourous way to define this.
+
 ```{r}
-mining_data_export = mining_data_clean %>%
+africa_ind = c(rep(TRUE, 35), rep(FALSE, 88))
+mining_data_clean_2 = mining_data_clean %>% 
+  mutate(africa_ind = africa_ind,
+         afro_descendent_ind = location %in% c("Colombia", "Venezuela", "Brazil", "Caribbean"),
+         africa_or_afro_descendent = africa_ind | afro_descendent_ind)
+```
+
+
+```{r}
+mining_data_export = mining_data_clean_2 %>%
   filter(location_type != "Other")
 ```
 
